@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\BLSMS;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Trait\APi\GeneralTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+use function PHPUnit\Framework\isNull;
+
+class UserController extends Controller
+{
+    use GeneralTrait;
+    function createUser(Request $request)
+    {
+        try {
+            requestAdd($request, [
+                'password' => ($password = rand(10000, 99999)),
+                'password_confirmation' => $password
+            ]);
+
+            $validator = $this->customValidator($request, [
+                'name' => 'string|required',
+                'phone' => 'string|required',
+                'email' => 'email',
+                'role_id' => 'numeric|required',
+                'username' => 'string|required|unique:users,username',
+                'password' => 'required|confirmed',
+            ]);
+
+            if (isset($validator['status'])) {
+                return response()->json($validator, 400);
+            }
+
+            $validator['password'] = bcrypt($validator['password']);
+            unset($validator['password_confirmation']);
+
+            $user = User::create($validator);
+            if ($user) {
+                Auth::login($user);
+                $message = 'Your password: ' . $password;
+                $message .= "\r\nThank you";
+                BLSMS::_sendMessageBLSM($message, $request->phone);
+
+                return response()->json([
+                    'status' => 'success',
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'phone' => $user->phone,
+                    'email' => $user->email,
+                    'role' => $user->role->name,
+                    'token' => $user->createToken('user')->plainTextToken,
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'Something went wrong!',
+                'status_code' => env('STATUS_CODE_PREFIX') . 'ERR500',
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+
+    function login(Request $request)
+    {
+        try {
+            $auth = Auth::attempt([
+                'username' => $request->username,
+                'password' => $request->password
+            ]);
+            if ($auth) {
+                $user =  User::find(Auth::user()->id);
+                return response()->json([
+                    'status' => 'success',
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'phone' => $user->phone,
+                    'email' => $user->email,
+                    'role' => $user->role->name,
+                    'token' => $user->createToken('user')->plainTextToken,
+                ]);
+            }
+            return response()->json([
+                'status' => 'Either username or password is incorrect'
+            ], 401);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'Something went wrong!',
+                'status_code' => env('STATUS_CODE_PREFIX') . 'ERR500',
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+}
