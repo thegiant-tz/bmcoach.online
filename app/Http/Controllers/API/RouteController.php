@@ -37,4 +37,59 @@ class RouteController extends Controller
                ->where('to', $request->to)->first();
           return RouteScheduleResource::collection($route->schedules)->resolve();
      }
+
+     function createRoute(Request $request)
+     {
+          try {
+               $fromRouteResposne = $this->routeCreateProcess($request, $request->from, $request->to);
+               if ($request->type == 'two-way') {
+                    $toRoute = $this->routeCreateProcess($request, $request->to, $request->from);
+                    if ($fromRouteResposne['status'] == 'success') {
+                         $response = $fromRouteResposne;
+                    } else if ($toRoute['status'] == 'success') {
+                         $response = $toRoute;
+                    } else {
+                         $response = $fromRouteResposne;
+                    }
+                    return response()->json($response);
+               }
+               return $fromRouteResposne;
+          } catch (\Throwable $th) {
+               return response()->json([
+                    'status' => 'error',
+                    'error' => $th->getMessage()
+               ]);
+          }
+     }
+
+     function routeCreateProcess(Request $request, $from, $to)
+     {
+          $route = Route::whereFrom($from = strtoupper($from))
+               ->whereTo($to = strtoupper($to))
+               ->first();
+          if (is_null($route)) {
+               $route = Route::create([
+                    'from' => $from,
+                    'to' => $to,
+                    'distance' => $request->distance,
+                    'time' => $request->time,
+               ]);
+               if ($route) {
+                    return [
+                         'status' => 'success',
+                         'route' => fullRoute($route)
+                    ];
+               } else {
+                    return [
+                         'status' => 'failed',
+                         'message' => 'Failed to create a new route'
+                    ];
+               }
+          } else {
+               return [
+                    'status' => 'exits',
+                    'message' => 'Route: ' . fullRoute($route). ' exists!'
+               ];
+          }
+     }
 }

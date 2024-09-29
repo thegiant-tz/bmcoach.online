@@ -17,17 +17,21 @@ class UserController extends Controller
     function createUser(Request $request)
     {
         try {
+
             requestAdd($request, [
                 'password' => ($password = rand(10000, 99999)),
-                'password_confirmation' => $password
+                'password_confirmation' => $password, 
+                'username' => $username = createUsername()
             ]);
+
+            
 
             $validator = $this->customValidator($request, [
                 'name' => 'string|required',
                 'phone' => 'string|required',
+                'username' => 'string|required',
                 'email' => 'email',
                 'role_id' => 'numeric|required',
-                'username' => 'string|required|unique:users,username',
                 'password' => 'required|confirmed',
             ]);
 
@@ -41,14 +45,17 @@ class UserController extends Controller
             $user = User::create($validator);
             if ($user) {
                 Auth::login($user);
-                $message = 'Your password: ' . $password;
-                $message .= "\r\nThank you";
+                $message = 'Dear: ' . strtoupper($user->name) . "\r\n\r\n";
+                $message .= "Your Login credentials are: \r\n";
+                $message .= 'Username: ' . $username . "\r\n";;
+                $message .= 'Password: ' . $password;;
+                $message .= "\r\n\r\nPlease do not share this credentials to anyone. Thank you";
                 BLSMS::_sendMessageBLSM($message, $request->phone);
 
                 return response()->json([
                     'status' => 'success',
                     'name' => $user->name,
-                    'username' => $user->username,
+                    'username' => $username,
                     'phone' => $user->phone,
                     'email' => $user->email,
                     'role' => $user->role->name,
