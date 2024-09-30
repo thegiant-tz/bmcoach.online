@@ -15,6 +15,8 @@ Route::get('/user', function (Request $request) {
 Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
     Route::post('create', [UserController::class, 'createUser'])->name('create');
     Route::post('login', [UserController::class, 'login'])->name('login');
+    Route::post('logout', [UserController::class, 'logout'])->name('logout');
+    Route::post('list', [UserController::class, 'list'])->name('list');
     Route::get('roles', [RoleController::class, 'getRoles'])->name('roles');
 });
 Route::group(['middleware' => 'auth:sanctum'], function () {

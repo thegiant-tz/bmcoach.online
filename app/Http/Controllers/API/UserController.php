@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\BLSMS;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Trait\APi\GeneralTrait;
 use Illuminate\Http\Request;
@@ -20,11 +21,11 @@ class UserController extends Controller
 
             requestAdd($request, [
                 'password' => ($password = rand(10000, 99999)),
-                'password_confirmation' => $password, 
+                'password_confirmation' => $password,
                 'username' => $username = createUsername()
             ]);
 
-            
+
 
             $validator = $this->customValidator($request, [
                 'name' => 'string|required',
@@ -94,6 +95,39 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'Either username or password is incorrect'
             ], 401);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'Something went wrong!',
+                'status_code' => env('STATUS_CODE_PREFIX') . 'ERR500',
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+    function list(Request $request)
+    {
+
+        $perPage = 20;
+        if ($request->filter != 'all') {
+            $users = User::whereRoleId($request->filter)
+                ->orderBy('name', 'ASC')
+                ->get();
+        } else {
+            $users = User::orderBy('name', 'ASC')->get();
+        }
+        return UserResource::collection($users)->resolve();
+    }
+
+
+    function logout(Request $request)
+    {
+        try {
+            $user = authUser();
+            $user->tokens()->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Logged out successfully'
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'Something went wrong!',
