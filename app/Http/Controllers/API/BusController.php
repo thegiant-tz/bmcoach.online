@@ -8,6 +8,7 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BookingResource;
+use App\Http\Resources\BusResource;
 
 class BusController extends Controller
 {
@@ -63,6 +64,18 @@ class BusController extends Controller
                     'message' => 'Bus number: ' . $bus->number . ' exists!'
                 ]);
             }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+    function list(Request $request)
+    {
+        try {
+            return BusResource::collection(Bus::orderBy('id', 'DESC')->orderBy('capacity', 'DESC')->get())->resolve();
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'error',

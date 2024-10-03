@@ -11,6 +11,12 @@ use Illuminate\Http\Request;
 
 class RouteController extends Controller
 {
+     function list(Request $request)
+     {
+          $routes = Route::groupBy('from', 'to')->get();
+          return RouteResource::collection($routes)->resolve();
+     }
+
      function routeList(Request $request)
      {
           $routes = Route::groupBy('from')->get();

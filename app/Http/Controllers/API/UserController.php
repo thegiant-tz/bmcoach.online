@@ -106,7 +106,6 @@ class UserController extends Controller
 
     function list(Request $request)
     {
-
         $perPage = 20;
         if ($request->filter != 'all') {
             $users = User::whereRoleId($request->filter)
@@ -122,11 +121,11 @@ class UserController extends Controller
     function logout(Request $request)
     {
         try {
-            $user = authUser();
-            $user->tokens()->delete();
+            
+            Auth::guard('sanctum')->user()->tokens()->delete();
             return response()->json([
                 'status' => 'success',
-                'message' => 'Logged out successfully'
+                'message' => 'logged out'
             ]);
         } catch (\Throwable $th) {
             return response()->json([
