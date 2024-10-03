@@ -19,7 +19,7 @@ class RouteResource extends JsonResource
             'from' => $this->from, 
             'to' => $this->to, 
             'distance' => $this->distance,
-            'time' => $this->distance,
+            'time' => $this->time,
             'schedules' => RouteScheduleResource::collection($this->schedules)
         ];
     }
