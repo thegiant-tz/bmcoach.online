@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BusResource;
 use App\Http\Resources\RouteBusesResource;
 use App\Http\Resources\RouteResource;
 use App\Http\Resources\RouteScheduleResource;
+use App\Models\Bus;
+use App\Models\BusRoute;
 use App\Models\Route;
 use Illuminate\Http\Request;
 
@@ -32,15 +35,19 @@ class RouteController extends Controller
 
      public function availableBuses(Request $request)
      {
-          $route = Route::where('from', $request->from)
-               ->where('to', $request->to)->first();
+          $route = getRouteInstance($request->from, $request->to);
+          return RouteBusesResource::collection($route->busRoutes)->resolve();
+     }
+
+     public function routeBuses(Request $request)
+     {
+          $route = getRouteInstance($request->from, $request->to);
           return RouteBusesResource::collection($route->busRoutes)->resolve();
      }
 
      public function routeSchedules(Request $request)
      {
-          $route = Route::where('from', $request->from)
-               ->where('to', $request->to)->first();
+          $route = getRouteInstance($request->from, $request->to);
           return RouteScheduleResource::collection($route->schedules)->resolve();
      }
 
@@ -70,9 +77,7 @@ class RouteController extends Controller
 
      function routeCreateProcess(Request $request, $from, $to)
      {
-          $route = Route::whereFrom($from = strtoupper($from))
-               ->whereTo($to = strtoupper($to))
-               ->first();
+          $route = getRouteInstance($request->from, $request->to);
           if (is_null($route)) {
                $route = Route::create([
                     'from' => $from,
@@ -94,8 +99,45 @@ class RouteController extends Controller
           } else {
                return [
                     'status' => 'exits',
-                    'message' => 'Route: ' . fullRoute($route). ' exists!'
+                    'message' => 'Route: ' . fullRoute($route) . ' exists!'
                ];
+          }
+     }
+
+     function getUnassignedBuses(Request $request)
+     {
+
+          $route = getRouteInstance($request->from, $request->to);
+          $assignedBusIds = $route->busRoutes()->get()->pluck('bus_id');
+          return BusResource::collection(Bus::whereNotIn('id', $assignedBusIds)->get())->resolve();
+     }
+
+     function assignBusToRoute(Request $request)
+     {
+          try {
+               $bus = getBus($request->busNo);
+               $route = getRouteInstance($request->from, $request->to);
+               $busRoute = BusRoute::updateOrCreate([
+                    'bus_id' => $bus->id,
+                    'route_id' => $route->id,
+               ]);
+               if ($busRoute) {
+                    return response()->json([
+                         'status' => 'success',
+                         'routeBuses' => $route->busRoutes,
+                         'message' => $bus->number . ' Assigned to this route',
+                    ]);
+               } else {
+                    return response()->json([
+                         'status' => 'failed',
+                         'message' => $bus->number . ' failed to be assigned on this route',
+                    ]);
+               }
+          } catch (\Throwable $th) {
+               return response()->json([
+                    'status' => 'error',
+                    'error' => $th->getMessage()
+               ]);
           }
      }
 }
