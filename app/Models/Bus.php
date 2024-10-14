@@ -14,4 +14,17 @@ class Bus extends Model
     {
         return $this->hasMany(Booking::class, 'bus_id', 'id');
     }
+
+    function timetables()
+    {
+        return $this->hasMany(Timetable::class, 'bus_id', 'id');
+    }
+
+    function busClass() {
+        return $this->belongsTo(BusClass::class, 'bus_class_id', 'id');
+    }
+
+    function layout() {
+        return $this->belongsTo(BusLayout::class, 'bus_layout_id', 'id');
+    }
 }

@@ -16,7 +16,8 @@ class RouteBusesResource extends JsonResource
     {
         return [
             'bus' => BusResource::make($this->bus),
-            'route' => RouteResource::make($this->route)
+            'route' => RouteResource::make($this->route), 
+            
         ];
     }
 }

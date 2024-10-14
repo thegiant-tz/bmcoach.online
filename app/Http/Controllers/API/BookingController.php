@@ -30,7 +30,7 @@ class BookingController extends Controller
                 'agent_id' => Auth::user()->id,
                 'psg_name' => $request->psg_name,
                 'fare' => $request->fare,
-                'dep_date' => $request->dep_date,
+                'dep_date' => $request->dep_date . ' ' . $request->dep_time,
                 'dep_time' => $request->dep_time,
                 'seat_no' => $request->seat_no,
             ]);
@@ -38,7 +38,8 @@ class BookingController extends Controller
             if ($booking) {
                 return response()->json([
                     'status' => 'success',
-                    'statusCode' => env('STATUS_CODE_PREFIX') . '200'
+                    'statusCode' => env('STATUS_CODE_PREFIX') . '200',
+                    'booking' => $booking
                 ], 200);
             }
             return response()->json([

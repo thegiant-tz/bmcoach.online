@@ -22,6 +22,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
 
 Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
     Route::get('list', [RouteController::class, 'routeList'])->name('list');
+    Route::post('timetable', [RouteController::class, 'routeTimetable'])->name('timetable');
     Route::get('all', [RouteController::class, 'list'])->name('list.all');
     Route::post('destinations', [RouteController::class, 'routeDestinations'])->name('destinations');
     Route::post('schedules', [RouteController::class, 'routeSchedules'])->name('schedules');

@@ -19,6 +19,11 @@ class BusResource extends JsonResource
             'capacity' => $this->capacity,
             'model' => $this->model,
             'status' => $this->status,
+            'layout' => [
+                'label' => $this->layout->label,
+                'name' => $this->layout->name,
+            ],
+            'class' => $this->busClass->name,
         ];
     }
 }

@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\BusResource;
-use App\Http\Resources\RouteBusesResource;
-use App\Http\Resources\RouteResource;
-use App\Http\Resources\RouteScheduleResource;
+use Carbon\Carbon;
 use App\Models\Bus;
-use App\Models\BusRoute;
 use App\Models\Route;
+use App\Models\BusRoute;
 use Illuminate\Http\Request;
+use App\Http\Resources\BusResource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\RouteResource;
+use App\Http\Resources\RouteBusesResource;
+use App\Http\Resources\RouteScheduleResource;
+use App\Http\Resources\TimeTableResource;
 
 class RouteController extends Controller
 {
@@ -139,5 +141,16 @@ class RouteController extends Controller
                     'error' => $th->getMessage()
                ]);
           }
+     }
+
+     function routeTimetable(Request $request) {
+          // return [$request->all()];
+          $route = getRouteInstance($request->from, $request->to);
+          $activeTimetable = $route->timetables()
+          ->whereDate('dep_time', $request->depDate)
+          ->orderBy('dep_time', 'asc')
+          // ->whereRaw("dep_time >= STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s')" , Carbon::now(env('APP_TIMEZONE'))->format('Y-m-d H:i'))
+          ->get();
+          return TimeTableResource::collection($activeTimetable)->resolve();
      }
 }
