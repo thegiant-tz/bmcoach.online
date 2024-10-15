@@ -16,6 +16,7 @@ class TimeTableResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'bus' => BusResource::make($this->bus),
             'route' => RouteResource::make($this->route),
             'date' => ($date = Carbon::parse($this->dep_time))->format('d.m.Y'),

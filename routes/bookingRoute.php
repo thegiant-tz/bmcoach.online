@@ -7,6 +7,7 @@ use App\Http\Controllers\API\RouteController;
 use App\Http\Controllers\API\BookingController;
 use App\Http\Controllers\API\BusController;
 use App\Http\Controllers\API\RoleController;
+use App\Http\Controllers\API\TimetableController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -29,6 +30,10 @@ Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
     Route::post('available-buses', [RouteController::class, 'availableBuses'])->name('available.buses');
 });
 
+Route::group(['prefix' => 'timetable', 'as' => 'timetable.'], function () {
+    Route::post('booked-seats', [TimetableController::class, 'bookedSeats']);
+});
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // Route::get('get-buses', [BookingController::class, 'getBuses'])->name('get.buses');
     Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
@@ -38,8 +43,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::post('store', [BookingController::class, 'store'])->name('store');
+    Route::post('destroy', [BookingController::class, 'destroy'])->name('destroy');
     Route::get('list', [BookingController::class, 'list'])->name('list');
-    Route::group(['prefix' => 'bus', 'as' => 'bus.'], function() {
+    Route::group(['prefix' => 'bus', 'as' => 'bus.'], function () {
         Route::post('schedules', [BusController::class, 'busSchedules'])->name('schedules');
         Route::post('passengers', [BusController::class, 'busPassengers'])->name('passengers');
         Route::post('create', [BusController::class, 'createBus'])->name('create');

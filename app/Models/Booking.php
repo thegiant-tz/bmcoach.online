@@ -21,4 +21,8 @@ class Booking extends Model
     function agent() {
         return $this->belongsTo(User::class, 'agent_id', 'id');
     }
+
+    function timetable() {
+        return $this->belongsTo(Timetable::class, 'timetable_id', 'id');
+    }
 }

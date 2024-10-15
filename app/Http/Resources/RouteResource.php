@@ -21,7 +21,7 @@ class RouteResource extends JsonResource
             'distance' => $this->distance,
             'time' => $this->time,
             'labelled_time' => ($hours = floor($this->time / 60)) . ' hrs ' . ($this->time % 60).' min',
-            'schedules' => RouteScheduleResource::collection($this->schedules)
+            'schedules' => RouteScheduleResource::collection($this->schedules),
         ];
     }
 }
