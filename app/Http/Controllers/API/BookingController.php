@@ -47,7 +47,8 @@ class BookingController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'statusCode' => env('STATUS_CODE_PREFIX') . '200',
-                    'booking' => $booking
+                    'booking' => $booking, 
+                    'ticketNo' => 'BM'.str_pad($booking->id, 5, '0', STR_PAD_LEFT)
                 ], 200);
             }
             return response()->json([
