@@ -24,6 +24,7 @@ class TimeTableResource extends JsonResource
             'datetime' => $date->format('d.m.Y H:i'),
             'seats_left' => getBusSeatLeft($this->bus, $date->format('Y-m-d H:i:s'), $date->format('H:i:s')),
             'fare' => getFare($this->route, $this->bus),
+            'is_active' => $this->is_active,
         ];
     }
 }

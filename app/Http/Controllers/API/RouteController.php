@@ -13,6 +13,7 @@ use App\Http\Resources\RouteResource;
 use App\Http\Resources\RouteBusesResource;
 use App\Http\Resources\RouteScheduleResource;
 use App\Http\Resources\TimeTableResource;
+use Illuminate\Support\Facades\DB;
 
 class RouteController extends Controller
 {
@@ -143,14 +144,34 @@ class RouteController extends Controller
           }
      }
 
-     function routeTimetable(Request $request) {
+     function routeTimetable(Request $request)
+     {
           // return [$request->all()];
           $route = getRouteInstance($request->from, $request->to);
           $activeTimetable = $route->timetables()
-          ->whereDate('dep_time', $request->depDate)
-          ->orderBy('dep_time', 'asc')
-          // ->whereRaw("dep_time >= STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s')" , Carbon::now(env('APP_TIMEZONE'))->format('Y-m-d H:i'))
-          ->get();
+               ->whereDate('dep_time', $request->depDate)
+               ->whereIsActive(true)
+               ->orderBy('dep_time', 'asc')
+               // ->whereRaw("dep_time >= STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s')" , Carbon::now(env('APP_TIMEZONE'))->format('Y-m-d H:i'))
+               ->get();
           return TimeTableResource::collection($activeTimetable)->resolve();
+     }
+
+     function routeGroupedTimetable(Request $request)
+     {
+          $route = getRouteInstance($request->from, $request->to);
+          $groupedDates = $route->timetables()
+               ->select(DB::raw('DATE(dep_time) as depDate'))
+               ->orderBy('depDate', 'desc')->groupBy('depDate')
+               ->get()->pluck('depDate');
+          $timetables = [];
+          foreach ($groupedDates as $groupedDate) {
+               $timetables[$groupedDate] = TimeTableResource::collection($route->timetables()->whereDate('dep_time', $groupedDate)->get())->resolve();
+          }
+
+          return response()->json([
+               'dates' => $groupedDates, 
+               'timetables' => $timetables
+          ]);
      }
 }

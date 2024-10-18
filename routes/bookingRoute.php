@@ -24,6 +24,8 @@ Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
 Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
     Route::get('list', [RouteController::class, 'routeList'])->name('list');
     Route::post('timetable', [RouteController::class, 'routeTimetable'])->name('timetable');
+    Route::post('timetable/grouped', [RouteController::class, 'routeGroupedTimetable']);
+    Route::post('timetable/state', [TimetableController::class, 'setTimetableState']);
     Route::get('all', [RouteController::class, 'list'])->name('list.all');
     Route::post('destinations', [RouteController::class, 'routeDestinations'])->name('destinations');
     Route::post('schedules', [RouteController::class, 'routeSchedules'])->name('schedules');
@@ -32,6 +34,7 @@ Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
 
 Route::group(['prefix' => 'timetable', 'as' => 'timetable.'], function () {
     Route::post('booked-seats', [TimetableController::class, 'bookedSeats']);
+    Route::post('create', [TimetableController::class, 'create']);
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -50,5 +53,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('passengers', [BusController::class, 'busPassengers'])->name('passengers');
         Route::post('create', [BusController::class, 'createBus'])->name('create');
         Route::get('list', [BusController::class, 'list'])->name('list');
+        Route::get('layouts', [BusController::class, 'busLayouts']);
+        Route::get('classes', [BusController::class, 'busClasses']);
     });
 });

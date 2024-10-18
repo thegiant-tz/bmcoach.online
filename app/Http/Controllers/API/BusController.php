@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\BusResource;
+use App\Models\BusClass;
+use App\Models\BusLayout;
 
 class BusController extends Controller
 {
@@ -46,6 +48,8 @@ class BusController extends Controller
                     'capacity' => $request->capacity,
                     'model' => $request->model,
                     'status' => $request->status ?? 'available',
+                    'bus_layout_id' => $request->bus_layout_id,
+                    'bus_class_id' => $request->bus_class_id,
                 ]);
                 if ($bus) {
                     return response()->json([
@@ -82,5 +86,13 @@ class BusController extends Controller
                 'error' => $th->getMessage()
             ]);
         }
+    }
+
+    function busLayouts(Request $request) {
+        return BusLayout::all();
+    }
+
+    function busClasses(Request $request) {
+        return BusClass::all();
     }
 }
