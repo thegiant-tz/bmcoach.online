@@ -23,6 +23,8 @@ Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
 
 Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
     Route::get('list', [RouteController::class, 'routeList'])->name('list');
+    Route::post('fares', [RouteController::class, 'routeFares']);
+    Route::post('fare/create', [RouteController::class, 'routeFareCreate']);
     Route::post('timetable', [RouteController::class, 'routeTimetable'])->name('timetable');
     Route::post('timetable/grouped', [RouteController::class, 'routeGroupedTimetable']);
     Route::post('timetable/state', [TimetableController::class, 'setTimetableState']);

@@ -13,4 +13,8 @@ class BusClass extends Model
     function buses () {
         return $this->hasMany(Bus::class, 'bus_class_id', 'id');
     }
+
+    function fares () {
+        return $this->hasMany(Fare::class, 'bus_class_id', 'id');
+    }
 }

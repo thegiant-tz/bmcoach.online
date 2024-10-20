@@ -29,4 +29,9 @@ class Route extends Model
     {
         return $this->hasMany(Timetable::class, 'route_id', 'id');
     }
+
+    function fares()
+    {
+        return $this->hasMany(Fare::class, 'route_id', 'id');
+    }
 }

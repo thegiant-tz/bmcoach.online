@@ -9,10 +9,12 @@ use App\Models\BusRoute;
 use Illuminate\Http\Request;
 use App\Http\Resources\BusResource;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FareResource;
 use App\Http\Resources\RouteResource;
 use App\Http\Resources\RouteBusesResource;
 use App\Http\Resources\RouteScheduleResource;
 use App\Http\Resources\TimeTableResource;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class RouteController extends Controller
@@ -170,8 +172,44 @@ class RouteController extends Controller
           }
 
           return response()->json([
-               'dates' => $groupedDates, 
+               'dates' => $groupedDates,
                'timetables' => $timetables
           ]);
+     }
+
+     function routeFares(Request $request)
+     {
+          $fares = getRouteInstance($request->from, $request->to)->fares;
+          return FareResource::collection($fares)->resolve();
+     }
+
+     function routeFareCreate(Request $request)
+     {
+          try {
+               $route = getRouteInstance($request->from, $request->to);
+               $fare = $route->fares()->updateOrCreate([
+                    'route_id' => $route->id,
+                    'bus_class_id' => $request->bus_class_id,
+               ], [
+                    'route_id' => $route->id,
+                    'bus_class_id' => $request->bus_class_id,
+                    'fare' => $request->fare
+               ]);
+               if ($fare) {
+                    return response()->json([
+                         'status' => 'success',
+                         'fares' => FareResource::collection($route->fares)->resolve()
+                    ]);
+               }
+               return response()->json([
+                    'status' => 'failed',
+               ]);
+          } catch (Exception $e) {
+               return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Something went wrong!',
+                    'error' => $e->getMessage(),
+               ]);
+          }
      }
 }
