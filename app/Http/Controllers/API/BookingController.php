@@ -8,9 +8,11 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BookingResource;
+use App\Http\Resources\MyBookingsResource;
 use App\Models\Timetable;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -47,8 +49,8 @@ class BookingController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'statusCode' => env('STATUS_CODE_PREFIX') . '200',
-                    'booking' => $booking, 
-                    'ticketNo' => 'BM'.str_pad($booking->id, 5, '0', STR_PAD_LEFT)
+                    'booking' => $booking,
+                    'ticketNo' => 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT)
                 ], 200);
             }
             return response()->json([
@@ -83,9 +85,34 @@ class BookingController extends Controller
 
     function list(Request $request)
     {
-        $bookings = Booking::when(isset($request->depDate) && isset($request->busId), fn($query) => $query->where('DATE(dep_date)', $request->dep_date)->whereBusId($request->busId))
-            ->whereIn('route_id', [1])
-            ->groupBy('dep_date')->orderBy('id', 'desc')->get();
-        return BookingResource::collection($bookings)->resolve();
+        try {
+            $bookings = Booking::whereDate('dep_date', $request->depDate)
+                ->whereAgentId(authUser()->id)
+                ->groupBy('route_id')->orderBy('id', 'desc')->get()->map(function($booking) {
+                    $booking->routes = $booking->route->from . ' - ' . $booking->route->to;
+                    return $booking; 
+                });
+            $myBookings = [];
+            foreach ($bookings as $booking) {
+                $route = $booking->route;
+                $myBookings[$route->from . ' - ' . $route->to] = MyBookingsResource::collection(
+                    Booking::whereDate('dep_date', $request->depDate)->whereRouteId($route->id)
+                        ->groupBy('timetable_id')
+                        ->select(DB::raw('timetable_id, sum(fare) as total_collection, count(*) as total_passengers'))
+                        ->whereAgentId(authUser()->id)
+                        ->get()
+                );
+            }
+
+            return response([
+                'status' => 'success',
+                'routes' => $bookings->pluck('routes'),
+                'bookings' => $myBookings
+            ]);
+        } catch (\Throwable $th) {
+            return response([
+                'status' => 'failed',
+            ]);
+        }
     }
 }
