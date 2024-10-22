@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Bus;
-use App\Models\Route;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\BookingResource;
 use App\Http\Resources\MyBookingsResource;
 use App\Models\Timetable;
 use Carbon\Carbon;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BookingResource;
 use App\Models\Bus;
 use App\Models\Timetable;
 use Illuminate\Http\Request;
@@ -73,6 +74,22 @@ class TimetableController extends Controller
         } else {
             return response()->json([
                 'message' => 'State not changed'
+            ]);
+        }
+    }
+
+    function bookings(Request $request)
+    {
+        try {
+            $timetable = Timetable::find($request->timetableId);
+            return response([
+                'status' => 'success',
+                'bookings' => BookingResource::collection($timetable->bookings)->resolve()
+            ]);
+        } catch (\Throwable $th) {
+            return response([
+                'status' => 'failed',
+                'error' => $th->getMessage(),
             ]);
         }
     }

@@ -37,6 +37,7 @@ Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
 Route::group(['prefix' => 'timetable', 'as' => 'timetable.'], function () {
     Route::post('booked-seats', [TimetableController::class, 'bookedSeats']);
     Route::post('create', [TimetableController::class, 'create']);
+    Route::post('bookings', [TimetableController::class, 'bookings'])->middleware('auth:sanctum');
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
