@@ -19,9 +19,12 @@ class BookingResource extends JsonResource
     {
         return [
             'psgName' => $this->psg_name,
+            'psgPhone' => $this->psg_phone,
             'seatNo' => $this->seat_no,
+            'ticketNo' => 'BM' . str_pad($this->id, 5, '0', STR_PAD_LEFT),
             'fare' => $this->fare,
-            'agentName' => authUser()->id == $this->agent_id ? 'Me' : $this->agent->name,
+            'agentName' => $this->agent->name,
+            'agentCode' => $this->agent->username,
             'timetable' => TimeTableResource::make($this->timetable)
         ];
     }
