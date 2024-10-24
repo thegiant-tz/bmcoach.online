@@ -83,12 +83,13 @@ class BookingController extends Controller
 
     function list(Request $request)
     {
+        return [];
         try {
             $bookings = Booking::whereDate('dep_date', $request->depDate)
                 ->whereAgentId(authUser()->id)
-                ->groupBy('route_id')->orderBy('id', 'desc')->get()->map(function($booking) {
+                ->groupBy('route_id')->orderBy('id', 'desc')->get()->map(function ($booking) {
                     $booking->routes = $booking->route->from . ' - ' . $booking->route->to;
-                    return $booking; 
+                    return $booking;
                 });
             $myBookings = [];
             foreach ($bookings as $booking) {

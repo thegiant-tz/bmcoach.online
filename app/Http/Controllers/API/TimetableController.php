@@ -32,10 +32,6 @@ class TimetableController extends Controller
                 [
                     'bus_id' => $bus->id,
                     'route_id' => $route->id,
-                ],
-                [
-                    'bus_id' => $bus->id,
-                    'route_id' => $route->id,
                     'dep_time' => $request->depDate,
                 ]
             );
