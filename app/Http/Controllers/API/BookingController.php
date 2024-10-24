@@ -83,7 +83,6 @@ class BookingController extends Controller
 
     function list(Request $request)
     {
-        return [];
         try {
             $bookings = Booking::whereDate('dep_date', $request->depDate)
                 ->whereAgentId(authUser()->id)
