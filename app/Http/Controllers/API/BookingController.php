@@ -95,7 +95,6 @@ class BookingController extends Controller
                 $route = $booking->route;
                 $myBookings[$route->from . ' - ' . $route->to] = MyBookingsResource::collection(
                     Booking::whereDate('dep_date', $request->depDate)->whereRouteId($route->id)
-                        ->groupBy('timetable_id')
                         ->select(DB::raw('timetable_id, sum(fare) as total_collection, count(*) as total_passengers'))
                         ->whereAgentId(authUser()->id)
                         ->get()
