@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\BLSMS;
 use App\Models\Bus;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MyBookingsResource;
 use App\Models\Timetable;
+use App\Services\SMSService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +46,11 @@ class BookingController extends Controller
             ]);
 
             if ($booking) {
+                BLSMS::_sendMessageBLSM(
+                    message: SMSService::bookingSMS(),
+                    recipient: $booking->psg_phone
+                );
+                
                 return response()->json([
                     'status' => 'success',
                     'statusCode' => env('STATUS_CODE_PREFIX') . '200',
