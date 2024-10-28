@@ -23,6 +23,8 @@ class BookingController extends Controller
 
     function store(Request $request)
     {
+
+
         try {
             // $route = Route::whereFrom($request->from)->whereTo($request->to)->first();
             // $bus = Bus::whereNumber($request->bus_no)->first();
@@ -46,16 +48,17 @@ class BookingController extends Controller
             ]);
 
             if ($booking) {
+                $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
                 BLSMS::_sendMessageBLSM(
-                    message: SMSService::bookingSMS(),
+                    message: SMSService::bookingSMS($booking, $ticketNo),
                     recipient: $booking->psg_phone
                 );
-                
+
                 return response()->json([
                     'status' => 'success',
                     'statusCode' => env('STATUS_CODE_PREFIX') . '200',
                     'booking' => $booking,
-                    'ticketNo' => 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT)
+                    'ticketNo' => $ticketNo
                 ], 200);
             }
             return response()->json([

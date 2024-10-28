@@ -7,9 +7,8 @@ use App\Http\Controllers\Controller;
 
 class BLSMS extends Controller
 {
-    static function _sendMessageBLSM($message, $recipient, $allowedToSendSMS = true)
+    static function _sendMessageBLSM($message, $recipient)
     {
-
         $recipient = validRecipient($recipient);
         $api_key = env('SMS_API_KEY');
         $secret_key = env('SMS_API_SECRET');

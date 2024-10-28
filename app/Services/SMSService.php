@@ -1,20 +1,24 @@
 <?php 
 namespace App\Services;
 
+use App\Models\Booking;
+use Carbon\Carbon;
+
 class SMSService {
-    public static function bookingSMS() {
-        $message = "SHABANI RAJABU\n";
-        $message .= "T 111 ABC\n";
-        $message .= "From: Arusha\n";
-        $message .= "To: Moshi\n";
-        $message .= "Seat No: A2\n";
-        $message .= "Ticket No: BM00023\n";
-        $message .= "Date: 23.10.2024\n";
-        $message .= "Time: 18:00\n";
-        $message .= "Amount: 50,000\n\n";
-        $message .= "AGENT INFO\n";
-        $message .= "FADHILA MANGULA (BM0002)\n";
-        $message .= "0699183267\n\n";
+    public static function bookingSMS(Booking $booking, $ticketNo) {
+        $message = $booking->psg_name."\r\n";
+        $message .= $booking->bus->number. "\r\n";
+        $message .= "From: ".$booking->route->from."\r\n";
+        $message .= "To: ".$booking->route->to."\r\n";
+        $message .= "Seat No: ".$booking->seat_no."\r\n";
+        $message .= "Ticket No: $ticketNo\r\n";
+        $message .= "Date: ".Carbon::parse($booking->dep_date)->format('d.m.Y')."\r\n";
+        $message .= "Time: ".Carbon::parse($booking->dep_date)->format('H:i')."\r\n";
+        $message .= "Amount: ".number_format($booking->fare)."\r\n\r\n";
+        $message .= "AGENT INFO\r\n";
+        $message .= $booking->agent->name . " (".$booking->agent->username.")\r\n";
+        $message .= $booking->agent->phone."\r\n\r\n";
         $message .= "Thank you.";
+        return $message;
     }
 }
