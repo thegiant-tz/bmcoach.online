@@ -9,6 +9,7 @@ use App\Models\BusRoute;
 use Illuminate\Http\Request;
 use App\Http\Resources\BusResource;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BoardingPointResource;
 use App\Http\Resources\FareResource;
 use App\Http\Resources\RouteResource;
 use App\Http\Resources\RouteBusesResource;
@@ -201,6 +202,41 @@ class RouteController extends Controller
                          'fares' => FareResource::collection($route->fares)->resolve()
                     ]);
                }
+               return response()->json([
+                    'status' => 'failed',
+               ]);
+          } catch (Exception $e) {
+               return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Something went wrong!',
+                    'error' => $e->getMessage(),
+               ]);
+          }
+     }
+
+     function boardingPoints(Request $request)
+     {
+          $route = getRouteInstance($request->from, $request->to);
+          return response()->json([
+               'status' => 'success',
+               'points' => BoardingPointResource::collection($route->boardingPoints)->resolve()
+          ]);
+     }
+
+     function createBoardingPoint(Request $request)
+     {
+          try {
+               $route = getRouteInstance($request->from, $request->to);
+               $point = $route->boardingPoints()->updateOrCreate([
+                    'point' => $request->point
+               ]);
+               if ($point) {
+                    return response()->json([
+                         'status' => 'success',
+                         'points' => BoardingPointResource::collection($route->boardingPoints)->resolve()
+                    ]);
+               }
+
                return response()->json([
                     'status' => 'failed',
                ]);

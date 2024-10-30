@@ -34,4 +34,8 @@ class Route extends Model
     {
         return $this->hasMany(Fare::class, 'route_id', 'id');
     }
+
+    function boardingPoints() {
+        return $this->hasMany(BoardingPoint::class, 'route_id', 'id')->orderBy('point', 'ASC');
+    }
 }
