@@ -78,9 +78,10 @@ class TimetableController extends Controller
     {
         try {
             $timetable = Timetable::find($request->timetableId);
+            $bookings = $timetable->bookings()->when(!is_null(($agentId = $request->agentId)), fn($query) => $query->whereAgentId($agentId))->get();
             return response([
                 'status' => 'success',
-                'bookings' => BookingResource::collection($timetable->bookings)->resolve()
+                'bookings' => BookingResource::collection($bookings)->resolve()
             ]);
         } catch (\Throwable $th) {
             return response([

@@ -39,7 +39,7 @@ Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
 Route::group(['prefix' => 'timetable', 'as' => 'timetable.'], function () {
     Route::post('booked-seats', [TimetableController::class, 'bookedSeats']);
     Route::post('create', [TimetableController::class, 'create']);
-    Route::post('bookings', [TimetableController::class, 'bookings'])->middleware('auth:sanctum');
+    Route::post('bookings/{agentId?}', [TimetableController::class, 'bookings'])->middleware('auth:sanctum');
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -53,6 +53,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('store', [BookingController::class, 'store'])->name('store');
     Route::post('destroy', [BookingController::class, 'destroy'])->name('destroy');
     Route::post('list', [BookingController::class, 'list'])->name('list');
+    Route::post('timetable-agents-list', [BookingController::class, 'agentTimetableCollection']);
     Route::group(['prefix' => 'bus', 'as' => 'bus.'], function () {
         Route::post('schedules', [BusController::class, 'busSchedules'])->name('schedules');
         Route::post('passengers', [BusController::class, 'busPassengers'])->name('passengers');

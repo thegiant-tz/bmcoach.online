@@ -8,3 +8,22 @@ if (!function_exists('authUser')){
         return User::find(Auth::user()->id);
     }
 }
+
+if (!function_exists('isAgent')){
+    function isAgent():bool{
+        return User::find(Auth::user()->id)->role->name == 'agent';
+    }
+}
+
+if (!function_exists('isAdmin')){
+    function isAdmin():bool{
+        return User::find(Auth::user()->id)->role->name == 'admin';
+    }
+}
+
+
+if (!function_exists('isCashier')){
+    function isCashier():bool{
+        return User::find(Auth::user()->id)->role->name == 'cashier';
+    }
+}

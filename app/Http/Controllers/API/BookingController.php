@@ -7,6 +7,7 @@ use App\Models\Bus;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AgentTimetableCollectionResource;
 use App\Http\Resources\MyBookingsResource;
 use App\Models\Timetable;
 use App\Services\SMSService;
@@ -85,11 +86,18 @@ class BookingController extends Controller
                 'statusCode' => env('STATUS_CODE_PREFIX') . '200',
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 'something went wrong',
-                'statusCode' => env('STATUS_CODE_PREFIX') . '500',
-                'error' => $th->getMessage()
-            ], 500);
+            return errorResponse($th);
+        }
+    }
+
+    function agentTimetableCollection(Request $request)
+    {
+        try {
+            $bookings = Booking::whereTimetableId($request->timetableId)
+                ->groupBy('agent_id')->get();
+            return AgentTimetableCollectionResource::collection($bookings)->resolve();
+        } catch (\Throwable $th) {
+            return errorResponse($th);
         }
     }
 
@@ -97,7 +105,6 @@ class BookingController extends Controller
     {
         try {
             $bookings = Booking::whereDate('dep_date', $request->depDate)
-                ->whereAgentId(authUser()->id)
                 ->groupBy('route_id')->orderBy('id', 'desc')->get()->map(function ($booking) {
                     $booking->routes = $booking->route->from . ' - ' . $booking->route->to;
                     return $booking;
@@ -108,7 +115,8 @@ class BookingController extends Controller
                 $myBookings[$route->from . ' - ' . $route->to] = MyBookingsResource::collection(
                     Booking::whereDate('dep_date', $request->depDate)->whereRouteId($route->id)
                         ->select(DB::raw('timetable_id, sum(fare) as total_collection, count(*) as total_passengers'))
-                        ->whereAgentId(authUser()->id)
+                        ->when(isAgent(), fn($query) => $query->whereAgentId(authUser()->id))
+                        ->groupBy('bus_id')
                         ->get()
                 );
             }
