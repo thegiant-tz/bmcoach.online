@@ -84,6 +84,7 @@ class UserController extends Controller
                 $user =  User::find(Auth::user()->id);
                 return response()->json([
                     'status' => 'success',
+                    'id' => $user->id,
                     'name' => $user->name,
                     'username' => $user->username,
                     'phone' => $user->phone,
