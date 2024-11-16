@@ -24,15 +24,13 @@ class BookingController extends Controller
 
     function store(Request $request)
     {
-
-
         try {
             // $route = Route::whereFrom($request->from)->whereTo($request->to)->first();
             // $bus = Bus::whereNumber($request->bus_no)->first();
             $timetable = Timetable::find($request->timetableId);
             $booking = Booking::updateOrCreate([
                 'timetable_id' => $timetable->id,
-                'agent_id' => Auth::user()->id,
+                'agent_id' => $agentId = $request->userRole == 'agent' ?  Auth::user()->id : defaultAgentId(),
                 'status' => 'Processing'
             ], [
                 'route_id' => $timetable->route->id,
@@ -40,7 +38,7 @@ class BookingController extends Controller
                 'boarding_point_id' => $request->boardingPointId,
                 'dropping_point_id' => $request->droppingPointId,
                 'bus_id' => $timetable->bus->id,
-                'agent_id' => Auth::user()->id,
+                'agent_id' => $agentId,
                 'psg_name' => $request->psg_name ?? null,
                 'psg_phone' => $request->psg_phone ?? null,
                 'fare' => $request->fare,

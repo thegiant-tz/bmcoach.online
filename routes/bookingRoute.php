@@ -41,7 +41,7 @@ Route::group(['prefix' => 'timetable', 'as' => 'timetable.'], function () {
     Route::post('create', [TimetableController::class, 'create']);
     Route::post('bookings/{agentId?}', [TimetableController::class, 'bookings'])->middleware('auth:sanctum');
 });
-
+Route::post('store', [BookingController::class, 'store'])->name('store');
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // Route::get('get-buses', [BookingController::class, 'getBuses'])->name('get.buses');
     Route::group(['prefix' => 'route', 'as' => 'route.'], function () {
@@ -50,7 +50,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('assign-bus', [RouteController::class, 'assignBusToRoute'])->name('assigne.bus');
     });
 
-    Route::post('store', [BookingController::class, 'store'])->name('store');
     Route::post('destroy', [BookingController::class, 'destroy'])->name('destroy');
     Route::post('list', [BookingController::class, 'list'])->name('list');
     Route::post('timetable-agents-list', [BookingController::class, 'agentTimetableCollection']);
