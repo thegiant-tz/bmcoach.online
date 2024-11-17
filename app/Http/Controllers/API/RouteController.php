@@ -155,7 +155,7 @@ class RouteController extends Controller
                ->whereDate('dep_time', $request->depDate)
                ->whereIsActive(true)
                ->orderBy('dep_time', 'asc')
-               // ->whereRaw("dep_time >= STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s')" , Carbon::now(env('APP_TIMEZONE'))->format('Y-m-d H:i'))
+               ->whereRaw("dep_time >= STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s')" , Carbon::now(env('APP_TIMEZONE'))->format('Y-m-d H:i'))
                ->get();
           return TimeTableResource::collection($activeTimetable)->resolve();
      }
