@@ -25,6 +25,14 @@ class TimeTableResource extends JsonResource
             'seats_left' => getBusSeatLeft($this->bus, $date->format('Y-m-d H:i:s'), $date->format('H:i:s')),
             'fare' => getFare($this->route, $this->bus),
             'is_active' => $this->is_active,
+            'name' => $this->timetableName()
         ];
+    }
+
+    private function timetableName() {
+        $busNo = str_replace(' ', '_', $this->bus->number);
+        $route = substr($this->route->from, 0, 3) . '_' . substr($this->route->to, 0, 3);
+        $date = Carbon::parse($this->dep_time)->format('d_m_Y_H_i');
+        return $route . '_' . $busNo . '_'. $date;
     }
 }
