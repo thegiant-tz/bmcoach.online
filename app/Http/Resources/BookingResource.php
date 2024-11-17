@@ -18,7 +18,7 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $names = explode(' ', $this->psg_name);
-        $name = $names[0] . !isset($names[1]) ? '' : ' ' . str_split($names[1])[0] . '.';
+        $name = $names[0] . (!isset($names[1]) ? '' : ' ' . str_split($names[1])[0]);
 
         $names = explode(' ', $this->agent->name);
         $agentNamePdf = $names[0];

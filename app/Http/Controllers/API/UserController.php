@@ -109,7 +109,7 @@ class UserController extends Controller
     {
         $perPage = 20;
         if ($request->filter != 'all') {
-            $users = User::whereRoleId($request->filter)
+            $users = User::whereHas('role', fn($role) => $role->where('name', $request->filter))
                 ->orderBy('name', 'ASC')
                 ->get();
         } else {
@@ -122,7 +122,7 @@ class UserController extends Controller
     function logout(Request $request)
     {
         try {
-            
+
             Auth::guard('sanctum')->user()->tokens()->delete();
             return response()->json([
                 'status' => 'success',
