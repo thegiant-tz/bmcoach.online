@@ -30,7 +30,7 @@ class BookingController extends Controller
             $timetable = Timetable::find($request->timetableId);
             $booking = Booking::updateOrCreate([
                 'timetable_id' => $timetable->id,
-                'agent_id' => $agentId = $request->userRole == 'agent' ?  Auth::user()->id : defaultAgentId(),
+                'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
                 'status' => 'Processing'
             ], [
                 'route_id' => $timetable->route->id,

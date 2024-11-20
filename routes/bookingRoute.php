@@ -8,6 +8,7 @@ use App\Http\Controllers\API\BookingController;
 use App\Http\Controllers\API\BusController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\TimetableController;
+use App\Http\Controllers\PaymentGateways\AzampayController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -62,3 +63,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('classes', [BusController::class, 'busClasses']);
     });
 });
+
+Route::get('test', [AzampayController::class, 'authenticate']);

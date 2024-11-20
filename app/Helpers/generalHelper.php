@@ -1,7 +1,8 @@
 <?php
 
-use App\Models\Route;
 use App\Models\User;
+use App\Models\Route;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 if (!function_exists('validRecipient')) {
@@ -54,5 +55,31 @@ if (!function_exists('createUsername')) {
     {
         $latestUser = User::latest()->first();
         return 'BM'.str_pad(is_null($latestUser) ? 1 : $latestUser->id + 1, 4, '0', STR_PAD_LEFT);
+    }
+}
+
+if (!function_exists('phoneWithCountryCode')) {
+    function phoneWithCountryCode($phone, $callingCode = null)
+    {
+        if (is_null($callingCode)) {
+            $callingCode = defaultCountryCode();
+        }
+        $phone = replaceSpaceWith($phone, ' ', '');
+        $removal = str_startsWith($phone, '+0') ? '+0': (str_startsWith($phone, "0") ? '0': (!str_startsWith($phone, '+') ? '+':''));
+        return Str::replaceFirst($removal, $callingCode, $phone);
+    }
+}
+
+if (!function_exists('replaceSpaceWith')) {
+    function replaceSpaceWith($string, $remove, $place)
+    {
+        return $string = str_replace($remove, $place,  $string); # Replaces all spaces with char.
+    }
+}
+
+if (!function_exists('str_startsWith')) {
+    function str_startsWith($str, $start_with)
+    {
+        return Str::startsWith($str, $start_with);
     }
 }
