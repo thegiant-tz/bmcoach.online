@@ -33,7 +33,7 @@ class OptionalAuthMiddleware
     {
         // Attempt to authenticate the user
         try {
-            $guard = Auth::guard('api');
+            $guard = Auth::guard();
             if ($guard->check()) {
                 Auth::setUser($guard->user());
             }
