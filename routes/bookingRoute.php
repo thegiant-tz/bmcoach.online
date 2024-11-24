@@ -64,4 +64,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 });
 
-Route::get('test', [AzampayController::class, 'authenticate']);
+Route::post('test', [AzampayController::class, 'mnoCheckout']);
+Route::post('payment/feedback', [AzampayController::class, 'paymentFeedback']);
