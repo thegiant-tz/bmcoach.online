@@ -92,6 +92,7 @@ class BookingController extends Controller
     {
         try {
             $bookings = Booking::whereTimetableId($request->timetableId)
+                ->when(isset($request->username), fn($query) => $query->whereAgentId(userFromUsername($request->username)->id))
                 ->groupBy('agent_id')->get();
             return AgentTimetableCollectionResource::collection($bookings)->resolve();
         } catch (\Throwable $th) {
@@ -103,10 +104,12 @@ class BookingController extends Controller
     {
         try {
             $bookings = Booking::whereDate('dep_date', $request->depDate)
+                ->when(isset($request->username), fn($query) => $query->whereAgentId(userFromUsername($request->username)->id))
                 ->groupBy('route_id')->orderBy('id', 'desc')->get()->map(function ($booking) {
                     $booking->routes = $booking->route->from . ' - ' . $booking->route->to;
                     return $booking;
                 });
+
             $myBookings = [];
             foreach ($bookings as $booking) {
                 $route = $booking->route;
@@ -114,6 +117,7 @@ class BookingController extends Controller
                     Booking::whereDate('dep_date', $request->depDate)->whereRouteId($route->id)
                         ->select(DB::raw('timetable_id, sum(fare) as total_collection, count(*) as total_passengers'))
                         ->when(isAgent(), fn($query) => $query->whereAgentId(authUser()->id))
+                        ->when(isset($request->username), fn($query) => $query->whereAgentId(userFromUsername($request->username)->id))
                         ->groupBy('bus_id')
                         ->get()
                 );
@@ -122,12 +126,23 @@ class BookingController extends Controller
             return response([
                 'status' => 'success',
                 'routes' => $bookings->pluck('routes'),
-                'bookings' => $myBookings
+                'bookings' => $myBookings,
+                'revenue' => $this->agentTotalCollection($request)
             ]);
         } catch (\Throwable $th) {
             return response([
                 'status' => 'failed',
             ]);
         }
+    }
+
+    function agentTotalCollection(Request $request)
+    {
+        $bookings = Booking::whereDate('dep_date', $request->depDate)
+            ->select(DB::raw('timetable_id, sum(fare) as total_collection, count(*) as total_passengers'))
+            ->when(isAgent(), fn($query) => $query->whereAgentId(authUser()->id))
+            ->when(isset($request->username), fn($query) => $query->whereAgentId(userFromUsername($request->username)->id))
+            ->first();
+        return MyBookingsResource::make($bookings)->resolve();
     }
 }

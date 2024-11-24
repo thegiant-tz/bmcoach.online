@@ -43,6 +43,13 @@ if (!function_exists('defaultAgentId')) {
 if (!function_exists('defaultUser')) {
     function defaultUser(): User
     {
-        return User::where('username','BM0000')->first();
+        return User::where('username', 'BM0000')->first();
+    }
+}
+
+if (!function_exists('userFromUsername')) {
+    function userFromUsername($username = 'BM0000'): User
+    {
+        return User::where('username', $username)->first();
     }
 }
