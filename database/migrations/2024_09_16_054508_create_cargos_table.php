@@ -13,18 +13,22 @@ return new class extends Migration
     {
         Schema::create('cargos', function (Blueprint $table) {
             $table->id();
-            $table->string('codeId');
-            $table->string('descriptions');
-            $table->string('sender');
-            $table->string('receiver');
+            $table->foreignId('route_id')->constrained()->cascadeOnUpdate();
+            $table->foreignId('user_id')->constrained()->cascadeOnUpdate();
+            $table->foreignId('onboarded_by')->nullable()->constrained('users', 'id')->cascadeOnUpdate();
+            $table->foreignId('offboarded_by')->nullable()->constrained('users', 'id')->cascadeOnUpdate();
+            $table->string('sender_name');
             $table->string('sender_phone');
+            $table->string('sender_email')->nullable();
+            $table->string('receiver_name');
             $table->string('receiver_phone');
-            $table->string('pickup');
-            $table->string('destination');
+            $table->string('item_name');
             $table->double('weight')->nullable();
-            $table->double('dimension')->nullable();
+            $table->double('size')->nullable();
+            $table->double('item_value');
+            $table->double('amount');
             $table->enum('status', ['pending', 'in transit', 'destinated', 'delivered'])->default('pending');
-            $table->timestamp('delivery_date')->default(now());
+            $table->timestamp('dep_date')->default(now());
             $table->timestamps();
         });
     }
