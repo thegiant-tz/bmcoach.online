@@ -66,6 +66,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'cargo', 'as' => 'cargo.'], function() {
         Route::post('store', [CargoController::class, 'store']);
+        Route::post('list/{status?}', [CargoController::class, 'list']);
+        Route::post('boarding', [CargoController::class, 'boarding']);
     });
 });
 

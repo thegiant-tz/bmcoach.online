@@ -38,4 +38,8 @@ class Route extends Model
     function boardingPoints() {
         return $this->hasMany(BoardingPoint::class, 'route_id', 'id')->orderBy('point', 'ASC');
     }
+
+    function cargos() {
+        return $this->hasMany(Cargo::class, 'route_id', 'id');
+    }
 }

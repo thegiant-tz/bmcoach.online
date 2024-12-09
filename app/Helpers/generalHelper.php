@@ -83,3 +83,12 @@ if (!function_exists('str_startsWith')) {
         return Str::startsWith($str, $start_with);
     }
 }
+
+
+if (!function_exists('codeIdToId')) {
+    function codeIdToId($codeId)
+    {
+        return (int)str_replace('BMC', '', $codeId);
+    }
+}
+

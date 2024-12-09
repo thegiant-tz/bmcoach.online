@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Cargo;
+use App\Models\CargoTracker;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Bus extends Model
 {
@@ -26,5 +28,13 @@ class Bus extends Model
 
     function layout() {
         return $this->belongsTo(BusLayout::class, 'bus_layout_id', 'id');
+    }
+
+    function cargos() {
+        return $this->hasMany(Cargo::class, 'bus_id', 'id');
+    }
+
+    function cargoTrackers() {
+        return $this->hasMany(CargoTracker::class, 'respondent', 'id');
     }
 }

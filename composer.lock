@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "22d39e9fa10abb79e1280bd1a53c2659",
+    "content-hash": "e256baf4adc9354c41f0d9f493be1aaa",
     "packages": [
         {
             "name": "alphaolomi/laravel-azampay",
@@ -5536,6 +5536,54 @@
                 }
             ],
             "time": "2024-11-08T15:28:48+00:00"
+        },
+        {
+            "name": "thegiant/algorithms",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thegiant-tz/algorithms.git",
+                "reference": "7485b8716f463ab04a8ddd53c5d0bd7f258ccf0c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thegiant-tz/algorithms/zipball/7485b8716f463ab04a8ddd53c5d0bd7f258ccf0c",
+                "reference": "7485b8716f463ab04a8ddd53c5d0bd7f258ccf0c",
+                "shasum": ""
+            },
+            "require": {
+                "browner12/helpers": "^3.3",
+                "php": ">=5.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Thegiant\\Algorithms\\AesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Thegiant\\Algorithms\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Shebyclassic2018",
+                    "email": "shaabanbakhresa85@gmail.com"
+                }
+            ],
+            "description": "This packages is useful for data encryption and decryption",
+            "support": {
+                "issues": "https://github.com/thegiant-tz/algorithms/issues",
+                "source": "https://github.com/thegiant-tz/algorithms/tree/v1.1.0"
+            },
+            "time": "2024-06-10T07:45:08+00:00"
         },
         {
             "name": "thegiant/azampay",

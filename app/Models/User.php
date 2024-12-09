@@ -45,4 +45,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Booking::class, 'agent_id', 'id');
     }
+
+    function cargoTrackers() {
+        return $this->hasMany(CargoTracker::class, 'respondent', 'id');
+    }
+
+    function cargos() {
+        return $this->hasMany(Cargo::class, 'user_id', 'id');
+    }
 }
