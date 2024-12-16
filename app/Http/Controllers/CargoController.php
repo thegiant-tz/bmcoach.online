@@ -40,9 +40,9 @@ class CargoController extends Controller
         $cargos = Cargo::when(isset($request->getMyCargos), fn($cargo) => $cargo->whereUserId(authUser()->id)->latest()->take($request->limit ?? 10))
             ->when(isset($request->status), fn($cargo) => $cargo->whereHas('cargoTrackers', fn($cargoTracker) => $cargoTracker->whereStatus($request->status)))
             ->orderBy('id', 'DESC')
-            ->get();
+            ->paginate(10);
 
-        return CargoResource::collection($cargos)->resolve();
+        return CargoResource::collection($cargos);
     }
 
     function boarding(Request $request)
