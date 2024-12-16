@@ -53,3 +53,12 @@ if (!function_exists('userFromUsername')) {
         return User::where('username', $username)->first();
     }
 }
+
+if (!function_exists('isWebAPI')) {
+    function isWebAPI(): bool
+    {
+        return request()->header('X-App-Mode') == 'webAPI';
+    }
+}
+
+

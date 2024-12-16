@@ -42,7 +42,8 @@ class CargoController extends Controller
             ->orderBy('id', 'DESC')
             ->paginate(10);
 
-        return CargoResource::collection($cargos);
+        $cargoResource = CargoResource::collection($cargos);
+        return isWebAPI() ? $cargoResource : $cargoResource->resolve();
     }
 
     function boarding(Request $request)
