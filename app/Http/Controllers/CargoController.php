@@ -29,7 +29,7 @@ class CargoController extends Controller
 
         CargoTracker::updateOrCreate([
             'respondent' => authUser()->id,
-            'cargo_id' => $cargo->id
+            'cargo_id' => $cargo->id 
         ]);
 
         return !is_null($cargo) ? response(['message' => 'success', 'cargo' => CargoResource::make($cargo)->resolve()]) : response(['message' => 'failed']);
