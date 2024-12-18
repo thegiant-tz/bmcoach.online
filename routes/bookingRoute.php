@@ -70,6 +70,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('list/{status?}', [CargoController::class, 'list']);
         Route::post('boarding', [CargoController::class, 'boarding']);
     });
+
+    Route::group(['prefix' => 'boarding-points'], function() {
+        Route::get('list', [BookingController::class, 'boardingPointList']);
+    });
 });
 
 Route::post('test', [AzampayController::class, 'mnoCheckout']);

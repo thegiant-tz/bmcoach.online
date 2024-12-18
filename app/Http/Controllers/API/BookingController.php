@@ -8,7 +8,9 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AgentTimetableCollectionResource;
+use App\Http\Resources\BoardingPointResource;
 use App\Http\Resources\MyBookingsResource;
+use App\Models\BoardingPoint;
 use App\Models\Timetable;
 use App\Services\SMSService;
 use Carbon\Carbon;
@@ -144,5 +146,10 @@ class BookingController extends Controller
             ->when(isset($request->username), fn($query) => $query->whereAgentId(userFromUsername($request->username)->id))
             ->first();
         return MyBookingsResource::make($bookings)->resolve();
+    }
+
+    function boardingPointList() {
+        $points = BoardingPoint::orderBy('point', 'ASC')->get();
+        return BoardingPointResource::collection($points)->all();
     }
 }

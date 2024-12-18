@@ -39,6 +39,16 @@ class CargoController extends Controller
     {
         $cargos = Cargo::when(isset($request->getMyCargos), fn($cargo) => $cargo->whereUserId(authUser()->id)->latest()->take($request->limit ?? 10))
             ->when(isset($request->status), fn($cargo) => $cargo->whereHas('cargoTrackers', fn($cargoTracker) => $cargoTracker->whereStatus($request->status)))
+            ->when(isset($request->bookingId), fn($query) => $query->whereId(codeIdToId($request->bookingId)))
+            ->when(isset($request->bookingDate), fn($query) => $query->whereDate('created_at', $request->bookingDate))
+            ->when(isset($request->departureDate), fn($query) => $query->whereDate('dep_date', $request->departureDate))
+            /** agentName <==> agent Id */ 
+            ->when(isset($request->agentName), fn($query) => $query->whereUserId($request->agentName))
+            /** agentCode <==> agent Id */ 
+            ->when(isset($request->agentCode), fn($query) => $query->whereUserId($request->agentCode))
+            ->when(isset($request->origin), fn($query) => $query->whereHas('route', fn($route) => $route->where('from', $request->origin)))
+            ->when(isset($request->destination), fn($query) => $query->whereHas('route', fn($route) => $route->where('to', $request->destination)))
+            ->when(isset($request->busNumber), fn($query) => $query->whereHas('cargoTrackers', fn($cargoTrackers) => $cargoTrackers->whereBusId($request->busNumber)))
             ->orderBy('id', 'DESC')
             ->paginate(10);
 
