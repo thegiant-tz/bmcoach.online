@@ -50,7 +50,7 @@ class CargoController extends Controller
             ->when(isset($request->destination), fn($query) => $query->whereHas('route', fn($route) => $route->where('to', $request->destination)))
             ->when(isset($request->busNumber), fn($query) => $query->whereHas('cargoTrackers', fn($cargoTrackers) => $cargoTrackers->whereBusId($request->busNumber)))
             ->orderBy('id', 'DESC')
-            ->paginate(10);
+            ->paginate(20);
 
         $cargoResource = CargoResource::collection($cargos);
         return isWebAPI() ? $cargoResource : $cargoResource->resolve();

@@ -13,4 +13,9 @@ class BoardingPoint extends Model
     function route() {
         return $this->belongsTo(Route::class, 'route_id', 'id');
     }
+
+    function users()
+    {
+        return $this->hasMany(User::class, 'boarding_point_id', 'id');
+    }
 }
