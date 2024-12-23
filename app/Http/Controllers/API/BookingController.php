@@ -32,39 +32,41 @@ class BookingController extends Controller
             // $bus = Bus::whereNumber($request->bus_no)->first();
             if (!is_null($request->userRole)) {
                 $timetable = Timetable::find($request->timetableId);
-                $booking = Booking::updateOrCreate([
-                    'timetable_id' => $timetable->id,
-                    'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
-                    'status' => 'Processing'
-            ], [
-                    'route_id' => $timetable->route->id,
-                    'timetable_id' => $timetable->id,
-                    'boarding_point_id' => $request->boardingPointId,
-                    'dropping_point_id' => $request->droppingPointId,
-                    'bus_id' => $timetable->bus->id,
-                    'agent_id' => $agentId,
-                    'psg_name' => $request->psg_name ?? null,
-                    'psg_phone' => $request->psg_phone ?? null,
-                    'fare' => $request->fare,
-                    'dep_date' => $timetable->dep_time,
-                    'dep_time' => Carbon::parse($timetable->dep_time)->format('H:i:s'),
-                    'seat_no' => $request->seat_no,
-                    'status' => $request->status ?? 'Processing'
-                ]);
+                if (is_null($timetable->bookings()->whereSeatNo($request->seat_no)->first())) {
+                    $booking = Booking::updateOrCreate([
+                        'timetable_id' => $timetable->id,
+                        'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
+                        'status' => 'Processing'
+                    ], [
+                        'route_id' => $timetable->route->id,
+                        'timetable_id' => $timetable->id,
+                        'boarding_point_id' => $request->boardingPointId,
+                        'dropping_point_id' => $request->droppingPointId,
+                        'bus_id' => $timetable->bus->id,
+                        'agent_id' => $agentId,
+                        'psg_name' => $request->psg_name ?? null,
+                        'psg_phone' => $request->psg_phone ?? null,
+                        'fare' => $request->fare,
+                        'dep_date' => $timetable->dep_time,
+                        'dep_time' => Carbon::parse($timetable->dep_time)->format('H:i:s'),
+                        'seat_no' => $request->seat_no,
+                        'status' => $request->status ?? 'Processing'
+                    ]);
 
-                if ($booking) {
-                    $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
-                    BLSMS::_sendMessageBLSM(
-                        message: SMSService::bookingSMS($booking, $ticketNo),
-                        recipient: $booking->psg_phone
-                    );
-
-                    return response()->json([
-                        'status' => 'success',
-                        'statusCode' => env('STATUS_CODE_PREFIX') . '200',
-                        'booking' => $booking,
-                        'ticketNo' => $ticketNo
-                    ], 200);
+                    if ($booking) {
+                        $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
+                        BLSMS::_sendMessageBLSM(
+                            message: SMSService::bookingSMS($booking, $ticketNo),
+                            recipient: $booking->psg_phone
+                        );
+    
+                        return response()->json([
+                            'status' => 'success',
+                            'statusCode' => env('STATUS_CODE_PREFIX') . '200',
+                            'booking' => $booking,
+                            'ticketNo' => $ticketNo
+                        ], 200);
+                    }
                 }
             }
             return response()->json([
