@@ -86,9 +86,9 @@ if (!function_exists('str_startsWith')) {
 
 
 if (!function_exists('codeIdToId')) {
-    function codeIdToId($codeId)
+    function codeIdToId($codeId, $isCargo = true)
     {
-        return (int)str_replace('BMC', '', $codeId);
+        return (int)str_replace($isCargo ? 'BMC' : 'BM', '', $codeId);
     }
 }
 

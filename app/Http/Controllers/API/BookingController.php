@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AgentTimetableCollectionResource;
 use App\Http\Resources\BoardingPointResource;
+use App\Http\Resources\BookingResource;
 use App\Http\Resources\MyBookingsResource;
 use App\Models\BoardingPoint;
 use App\Models\Timetable;
@@ -100,6 +101,22 @@ class BookingController extends Controller
         } catch (\Throwable $th) {
             return errorResponse($th);
         }
+    }
+
+    function listAll(Request $request) {
+        $bookings = Booking::when(isset($request->status), fn($booking) => $booking->whereStatus($request->status))
+        ->when(isset($request->bookingId), fn($query) => $query->whereId(codeIdToId($request->bookingId, false)))
+        ->when(isset($request->bookingDate), fn($query) => $query->whereDate('created_at', $request->bookingDate))
+        ->when(isset($request->departureDate), fn($query) => $query->whereDate('dep_date', $request->departureDate))
+        /** agentName <==> agent Id */ 
+        ->when(isset($request->agentName), fn($query) => $query->whereAgentId($request->agentName))
+        /** agentCode <==> agent Id */ 
+        ->when(isset($request->agentCode), fn($query) => $query->whereAgentId($request->agentCode))
+        ->when(isset($request->origin), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('from', $request->origin)))
+        ->when(isset($request->destination), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('to', $request->destination)))
+        ->when(isset($request->busNumber), fn($query) => $query->whereHas('timetable', fn($timetable) => $timetable->whereBusId($request->busNumber)))
+        ->orderby('id', 'DESC')->paginate(57);
+        return BookingResource::collection($bookings);
     }
 
     function list(Request $request)

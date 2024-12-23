@@ -25,4 +25,12 @@ class Booking extends Model
     function timetable() {
         return $this->belongsTo(Timetable::class, 'timetable_id', 'id');
     }
+
+    function boardingPoint() {
+        return $this->belongsTo(BoardingPoint::class, 'boarding_point_id', 'id');
+    }
+
+    function droppingPoint() {
+        return $this->belongsTo(BoardingPoint::class, 'dropping_point_id', 'id');
+    }
 }

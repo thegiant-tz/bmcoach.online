@@ -110,12 +110,15 @@ class UserController extends Controller
         $perPage = 20;
         if ($request->filter != 'all') {
             $users = User::whereHas('role', fn($role) => $role->where('name', $request->filter))
-                ->orderBy('name', 'ASC')
-                ->get();
+                ->orderBy('name', 'ASC');
+
+            $users = (bool) $request->isPaginate ? $users->paginate($perPage) : $users->get();
         } else {
-            $users = User::orderBy('name', 'ASC')->get();
+            $users = User::orderBy('name', 'ASC');
+            $users = (bool) $request->isPaginate ? $users->paginate($perPage) : $users->get();
         }
-        return UserResource::collection($users)->resolve();
+        $userResource = UserResource::collection($users);
+        return (bool) $request->isPaginate ? $userResource : $userResource->resolve();
     }
 
 
@@ -127,6 +130,29 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'logged out'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'Something went wrong!',
+                'status_code' => env('STATUS_CODE_PREFIX') . 'ERR500',
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+    function setAccess(Request $request)
+    {
+        try {
+            $user = User::find(aes_decrypt($request->userId));
+            if ($user->update(['status' => (bool) aes_decrypt($request->status)])) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'updated'
+                ]);
+            }
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'failed to update'
             ]);
         } catch (\Throwable $th) {
             return response()->json([

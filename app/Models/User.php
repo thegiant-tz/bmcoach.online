@@ -53,4 +53,9 @@ class User extends Authenticatable
     function cargos() {
         return $this->hasMany(Cargo::class, 'user_id', 'id');
     }
+
+    function boardingPoint()
+    {
+        return $this->belongsTo(BoardingPoint::class, 'boarding_point_id', 'id');
+    }
 }
