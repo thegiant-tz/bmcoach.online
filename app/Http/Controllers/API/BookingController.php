@@ -30,40 +30,42 @@ class BookingController extends Controller
         try {
             // $route = Route::whereFrom($request->from)->whereTo($request->to)->first();
             // $bus = Bus::whereNumber($request->bus_no)->first();
-            $timetable = Timetable::find($request->timetableId);
-            $booking = Booking::updateOrCreate([
-                'timetable_id' => $timetable->id,
-                'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
-                'status' => 'Processing'
-            ], [
-                'route_id' => $timetable->route->id,
-                'timetable_id' => $timetable->id,
-                'boarding_point_id' => $request->boardingPointId,
-                'dropping_point_id' => $request->droppingPointId,
-                'bus_id' => $timetable->bus->id,
-                'agent_id' => $agentId,
-                'psg_name' => $request->psg_name ?? null,
-                'psg_phone' => $request->psg_phone ?? null,
-                'fare' => $request->fare,
-                'dep_date' => $timetable->dep_time,
-                'dep_time' => Carbon::parse($timetable->dep_time)->format('H:i:s'),
-                'seat_no' => $request->seat_no,
-                'status' => $request->status ?? 'Processing'
-            ]);
+            if (!is_null($request->userRole)) {
+                $timetable = Timetable::find($request->timetableId);
+                $booking = Booking::updateOrCreate([
+                    'timetable_id' => $timetable->id,
+                    'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
+                    'status' => 'Processing'
+                ], [
+                    'route_id' => $timetable->route->id,
+                    'timetable_id' => $timetable->id,
+                    'boarding_point_id' => $request->boardingPointId,
+                    'dropping_point_id' => $request->droppingPointId,
+                    'bus_id' => $timetable->bus->id,
+                    'agent_id' => $agentId,
+                    'psg_name' => $request->psg_name ?? null,
+                    'psg_phone' => $request->psg_phone ?? null,
+                    'fare' => $request->fare,
+                    'dep_date' => $timetable->dep_time,
+                    'dep_time' => Carbon::parse($timetable->dep_time)->format('H:i:s'),
+                    'seat_no' => $request->seat_no,
+                    'status' => $request->status ?? 'Processing'
+                ]);
 
-            if ($booking) {
-                $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
-                BLSMS::_sendMessageBLSM(
-                    message: SMSService::bookingSMS($booking, $ticketNo),
-                    recipient: $booking->psg_phone
-                );
+                if ($booking) {
+                    $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
+                    BLSMS::_sendMessageBLSM(
+                        message: SMSService::bookingSMS($booking, $ticketNo),
+                        recipient: $booking->psg_phone
+                    );
 
-                return response()->json([
-                    'status' => 'success',
-                    'statusCode' => env('STATUS_CODE_PREFIX') . '200',
-                    'booking' => $booking,
-                    'ticketNo' => $ticketNo
-                ], 200);
+                    return response()->json([
+                        'status' => 'success',
+                        'statusCode' => env('STATUS_CODE_PREFIX') . '200',
+                        'booking' => $booking,
+                        'ticketNo' => $ticketNo
+                    ], 200);
+                }
             }
             return response()->json([
                 'status' => 'failed',
@@ -103,19 +105,20 @@ class BookingController extends Controller
         }
     }
 
-    function listAll(Request $request) {
+    function listAll(Request $request)
+    {
         $bookings = Booking::when(isset($request->status), fn($booking) => $booking->whereStatus($request->status))
-        ->when(isset($request->bookingId), fn($query) => $query->whereId(codeIdToId($request->bookingId, false)))
-        ->when(isset($request->bookingDate), fn($query) => $query->whereDate('created_at', $request->bookingDate))
-        ->when(isset($request->departureDate), fn($query) => $query->whereDate('dep_date', $request->departureDate))
-        /** agentName <==> agent Id */ 
-        ->when(isset($request->agentName), fn($query) => $query->whereAgentId($request->agentName))
-        /** agentCode <==> agent Id */ 
-        ->when(isset($request->agentCode), fn($query) => $query->whereAgentId($request->agentCode))
-        ->when(isset($request->origin), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('from', $request->origin)))
-        ->when(isset($request->destination), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('to', $request->destination)))
-        ->when(isset($request->busNumber), fn($query) => $query->whereHas('timetable', fn($timetable) => $timetable->whereBusId($request->busNumber)))
-        ->orderby('id', 'DESC')->paginate(57);
+            ->when(isset($request->bookingId), fn($query) => $query->whereId(codeIdToId($request->bookingId, false)))
+            ->when(isset($request->bookingDate), fn($query) => $query->whereDate('created_at', $request->bookingDate))
+            ->when(isset($request->departureDate), fn($query) => $query->whereDate('dep_date', $request->departureDate))
+            /** agentName <==> agent Id */
+            ->when(isset($request->agentName), fn($query) => $query->whereAgentId($request->agentName))
+            /** agentCode <==> agent Id */
+            ->when(isset($request->agentCode), fn($query) => $query->whereAgentId($request->agentCode))
+            ->when(isset($request->origin), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('from', $request->origin)))
+            ->when(isset($request->destination), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('to', $request->destination)))
+            ->when(isset($request->busNumber), fn($query) => $query->whereHas('timetable', fn($timetable) => $timetable->whereBusId($request->busNumber)))
+            ->orderby('id', 'DESC')->paginate(57);
         return BookingResource::collection($bookings);
     }
 
@@ -165,7 +168,8 @@ class BookingController extends Controller
         return MyBookingsResource::make($bookings)->resolve();
     }
 
-    function boardingPointList() {
+    function boardingPointList()
+    {
         $points = BoardingPoint::orderBy('point', 'ASC')->get();
         return BoardingPointResource::collection($points)->all();
     }
