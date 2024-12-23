@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BookingResource;
-use App\Models\Bus;
 use App\Models\Timetable;
 use Illuminate\Http\Request;
 
