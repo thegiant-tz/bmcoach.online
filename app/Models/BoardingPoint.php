@@ -16,6 +16,16 @@ class BoardingPoint extends Model
 
     function users()
     {
-        return $this->hasMany(User::class, 'boarding_point_id', 'id');
+        return $this->hasMany(User::class, 'agent_id', 'id');
+    }
+
+    function boardingPointbookings()
+    {
+        return $this->hasMany(Booking::class, 'boarding_point_id', 'id');
+    }
+    
+    function droppingPointBookings()
+    {
+        return $this->hasMany(Booking::class, 'dropping_point_id', 'id');
     }
 }

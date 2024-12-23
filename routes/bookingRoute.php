@@ -56,6 +56,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('store', [BookingController::class, 'store'])->name('store');
     Route::post('destroy', [BookingController::class, 'destroy'])->name('destroy');
     Route::post('list', [BookingController::class, 'list'])->name('list');
+    Route::post('list-all', [BookingController::class, 'listAll'])->name('listAll');
     Route::post('timetable-agents-list', [BookingController::class, 'agentTimetableCollection']);
     Route::group(['prefix' => 'bus', 'as' => 'bus.'], function () {
         Route::post('schedules', [BusController::class, 'busSchedules'])->name('schedules');
