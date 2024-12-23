@@ -23,7 +23,6 @@ class BookingResource extends JsonResource
         $names = explode(' ', $this->agent->name);
         $agentNamePdf = $names[0];
         return [
-
             'psgName' => $this->psg_name,
             'psgNamePdf' => $name,
             'psgPhone' => $this->psg_phone,
@@ -37,7 +36,7 @@ class BookingResource extends JsonResource
             'bookedAt' => Carbon::parse($this->created_at)->format('d/m/Y'),
             'depDate' => Carbon::parse($this->dep_date)->format('d/m/Y'),
             'boardingPoint' => $this->boardingPoint->point ?? '',
-            'droppingPoint' => $this->droppingPoint->point ?? '',
+            'droppingPoint' => $this->timetable->route->to ?? '',
             'status' => $this->status,
         ];
     }
