@@ -30,7 +30,7 @@ class BookingController extends Controller
         try {
             // $route = Route::whereFrom($request->from)->whereTo($request->to)->first();
             // $bus = Bus::whereNumber($request->bus_no)->first();
-            if (!is_null($request->userRole)) {
+            if (is_null($request->userRole)) {
                 $timetable = Timetable::find($request->timetableId);
                 if (is_null($timetable->bookings()->whereSeatNo($request->seat_no)->first())) {
                     $booking = Booking::updateOrCreate([
