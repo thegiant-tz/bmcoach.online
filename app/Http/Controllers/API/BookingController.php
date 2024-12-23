@@ -36,7 +36,7 @@ class BookingController extends Controller
                     'timetable_id' => $timetable->id,
                     'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
                     'status' => 'Processing'
-                ], [
+            ], [
                     'route_id' => $timetable->route->id,
                     'timetable_id' => $timetable->id,
                     'boarding_point_id' => $request->boardingPointId,
