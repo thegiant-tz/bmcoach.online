@@ -36,8 +36,8 @@ class BookingResource extends JsonResource
             'timetable' => TimeTableResource::make($this->timetable),
             'bookedAt' => Carbon::parse($this->created_at)->format('d/m/Y'),
             'depDate' => Carbon::parse($this->dep_date)->format('d/m/Y'),
-            'boardingPoint' => $this->boardingPoint->point,
-            'droppingPoint' => $this->droppingPoint->point,
+            'boardingPoint' => $this->boardingPoint->point ?? '',
+            'droppingPoint' => $this->droppingPoint->point ?? '',
             'status' => $this->status,
         ];
     }
