@@ -29,7 +29,7 @@ class CargoController extends Controller
 
         CargoTracker::updateOrCreate([
             'respondent' => authUser()->id,
-            'cargo_id' => $cargo->id 
+            'cargo_id' => $cargo->id
         ]);
 
         return !is_null($cargo) ? response(['message' => 'success', 'cargo' => CargoResource::make($cargo)->resolve()]) : response(['message' => 'failed']);
@@ -42,15 +42,20 @@ class CargoController extends Controller
             ->when(isset($request->bookingId), fn($query) => $query->whereId(codeIdToId($request->bookingId)))
             ->when(isset($request->bookingDate), fn($query) => $query->whereDate('created_at', $request->bookingDate))
             ->when(isset($request->departureDate), fn($query) => $query->whereDate('dep_date', $request->departureDate))
-            /** agentName <==> agent Id */ 
+            /** agentName <==> agent Id */
             ->when(isset($request->agentName), fn($query) => $query->whereUserId($request->agentName))
-            /** agentCode <==> agent Id */ 
+            /** agentCode <==> agent Id */
             ->when(isset($request->agentCode), fn($query) => $query->whereUserId($request->agentCode))
             ->when(isset($request->origin), fn($query) => $query->whereHas('route', fn($route) => $route->where('from', $request->origin)))
             ->when(isset($request->destination), fn($query) => $query->whereHas('route', fn($route) => $route->where('to', $request->destination)))
             ->when(isset($request->busNumber), fn($query) => $query->whereHas('cargoTrackers', fn($cargoTrackers) => $cargoTrackers->whereBusId($request->busNumber)))
-            ->orderBy('id', 'DESC')
-            ->paginate(100);
+            ->orderBy('id', 'DESC');
+        if ($request->isPaginate) {
+            $cargos = $cargos->paginate(100);
+        } else {
+            $cargos = $cargos->get();
+        }
+
 
         $cargoResource = CargoResource::collection($cargos);
         return isWebAPI() ? $cargoResource : $cargoResource->resolve();
