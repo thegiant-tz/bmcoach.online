@@ -12,7 +12,7 @@ class CargoController extends Controller
     public function store(Request $request)
     {
         $cargo = Cargo::updateOrCreate([
-            'route_id' => getRouteInstance($request->from, $request->to)->id,
+            'route_id' => getRouteInstance($request)->id,
             'user_id' => authUser()->id,
             'sender_name' => $request->sender_name,
             'sender_phone' => $request->sender_phone,

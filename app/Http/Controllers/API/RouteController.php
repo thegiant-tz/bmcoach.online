@@ -22,14 +22,22 @@ class RouteController extends Controller
 {
      function list(Request $request)
      {
-          $routes = Route::groupBy('from', 'to')->get();
-          return RouteResource::collection($routes)->resolve();
+          $perPage = $request->perPage ?? 20;
+            $routeQuery = Route::groupBy('from', 'to');
+            $routes = (bool) $request->isPaginate ? $routeQuery->paginate($perPage) : $routeQuery->get();
+            
+            $routeResource = RouteResource::collection($routes);
+            return (bool) $request->isPaginate ? $routeResource : $routeResource->resolve();
      }
 
      function routeList(Request $request)
      {
-          $routes = Route::groupBy('from')->get();
-          return RouteResource::collection($routes)->resolve();
+          $perPage = $request->perPage ?? 20;
+          $routeQuery = ($request->needsToGroup ?? true) ? Route::groupBy('from') : Route::query();
+          $routes = (bool) $request->isPaginate ? $routeQuery->paginate($perPage) : $routeQuery->get();
+          
+          $routeResource = RouteResource::collection($routes);
+          return (bool) $request->isPaginate ? $routeResource : $routeResource->resolve();
      }
 
      function routeDestinations(Request $request)
@@ -41,19 +49,19 @@ class RouteController extends Controller
 
      public function availableBuses(Request $request)
      {
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           return RouteBusesResource::collection($route->busRoutes)->resolve();
      }
 
      public function routeBuses(Request $request)
      {
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           return RouteBusesResource::collection($route->busRoutes)->resolve();
      }
 
      public function routeSchedules(Request $request)
      {
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           return RouteScheduleResource::collection($route->schedules)->resolve();
      }
 
@@ -83,7 +91,7 @@ class RouteController extends Controller
 
      function routeCreateProcess(Request $request, $from, $to)
      {
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           if (is_null($route)) {
                $route = Route::create([
                     'from' => $from,
@@ -113,7 +121,7 @@ class RouteController extends Controller
      function getUnassignedBuses(Request $request)
      {
 
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           $assignedBusIds = $route->busRoutes()->get()->pluck('bus_id');
           return BusResource::collection(Bus::whereNotIn('id', $assignedBusIds)->get())->resolve();
      }
@@ -122,7 +130,7 @@ class RouteController extends Controller
      {
           try {
                $bus = getBus($request->busNo);
-               $route = getRouteInstance($request->from, $request->to);
+               $route = getRouteInstance($request);
                $busRoute = BusRoute::updateOrCreate([
                     'bus_id' => $bus->id,
                     'route_id' => $route->id,
@@ -150,7 +158,7 @@ class RouteController extends Controller
      function routeTimetable(Request $request)
      {
           // return [$request->all()];
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           $activeTimetable = $route->timetables()
                ->whereDate('dep_time', $request->depDate)
                ->whereIsActive(true)
@@ -162,7 +170,8 @@ class RouteController extends Controller
 
      function routeGroupedTimetable(Request $request)
      {
-          $route = getRouteInstance($request->from, $request->to);
+
+          $route =  getRouteInstance($request);
           $groupedDates = $route->timetables()
                ->select(DB::raw('DATE(dep_time) as depDate'))
                ->orderBy('depDate', 'desc')->groupBy('depDate')
@@ -180,14 +189,15 @@ class RouteController extends Controller
 
      function routeFares(Request $request)
      {
-          $fares = getRouteInstance($request->from, $request->to)->fares;
+          $route = getRouteInstance($request);
+          $fares = $route->fares;
           return FareResource::collection($fares)->resolve();
      }
 
      function routeFareCreate(Request $request)
      {
           try {
-               $route = getRouteInstance($request->from, $request->to);
+               $route = getRouteInstance($request);
                $fare = $route->fares()->updateOrCreate([
                     'route_id' => $route->id,
                     'bus_class_id' => $request->bus_class_id,
@@ -216,7 +226,7 @@ class RouteController extends Controller
 
      function boardingPoints(Request $request)
      {
-          $route = getRouteInstance($request->from, $request->to);
+          $route = getRouteInstance($request);
           return response()->json([
                'status' => 'success',
                'points' => BoardingPointResource::collection($route->boardingPoints)->resolve()
@@ -226,7 +236,7 @@ class RouteController extends Controller
      function createBoardingPoint(Request $request)
      {
           try {
-               $route = getRouteInstance($request->from, $request->to);
+               $route = getRouteInstance($request);
                $point = $route->boardingPoints()->updateOrCreate([
                     'point' => $request->point
                ]);

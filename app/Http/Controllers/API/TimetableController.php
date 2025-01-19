@@ -25,7 +25,7 @@ class TimetableController extends Controller
     function create(Request $request)
     {
         try {
-            $route = getRouteInstance($request->from, $request->to);
+            $route = getRouteInstance($request);
             $bus = getBus($request->busNo);
             $timetable = Timetable::updateOrCreate(
                 [
