@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Timetable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,8 +22,9 @@ class TimeTableResource extends JsonResource
             'route' => RouteResource::make($this->route),
             'date' => ($date = Carbon::parse($this->dep_time))->format('d.m.Y'),
             'time' => $date->format('H:i'),
+            'reportingTime' => $date->subMinutes(30)->format('H:i'),
             'datetime' => $date->format('d.m.Y H:i'),
-            'seats_left' => getBusSeatLeft($this->bus, $date->format('Y-m-d H:i:s'), $date->format('H:i:s')),
+            'seats_left' => getBusSeatLeft(Timetable::find($this->id)),
             'fare' => getFare($this->route, $this->bus),
             'is_active' => $this->is_active,
             'name' => $this->timetableName()

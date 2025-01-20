@@ -13,12 +13,10 @@ if (!function_exists('getBus')) {
 }
 
 if (!function_exists('getBusSeatLeft')) {
-    function getBusSeatLeft(Bus $bus, $depDate, $depTime) {
-        $capacity = $bus->layout->capacity;
-        $bookings = $bus->bookings()
-        ->where('dep_date', $depDate)
-        ->get();
-        return $capacity - count($bookings);
+    function getBusSeatLeft(Timetable $timetable) {
+
+        $capacity = $timetable->bus->layout->capacity;
+        return $capacity - count($timetable->bookings);
     }
 }
 

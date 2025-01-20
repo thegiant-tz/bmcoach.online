@@ -79,7 +79,12 @@ class BusController extends Controller
     function list(Request $request)
     {
         try {
-            return BusResource::collection(Bus::orderBy('id', 'DESC')->orderBy('capacity', 'DESC')->get())->resolve();
+            $perPage = $request->perPage ?? 20;
+            $busQuery = Bus::orderBy('id', 'DESC')->orderBy('capacity', 'DESC');
+            $buses = (bool) $request->isPaginate ? $busQuery->paginate($perPage) : $busQuery->get();
+            
+            $busResource = BusResource::collection($buses);
+            return (bool) $request->isPaginate ? $busResource : $busResource->resolve();
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'error',

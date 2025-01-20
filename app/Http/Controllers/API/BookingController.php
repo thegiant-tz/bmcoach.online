@@ -41,7 +41,7 @@ class BookingController extends Controller
                         'route_id' => $timetable->route->id,
                         'timetable_id' => $timetable->id,
                         'boarding_point_id' => $request->boardingPointId,
-                        'dropping_point_id' => $request->droppingPointId,
+                        'dropping_point_id' => null,
                         'bus_id' => $timetable->bus->id,
                         'agent_id' => $agentId,
                         'psg_name' => $request->psg_name ?? null,
@@ -67,6 +67,11 @@ class BookingController extends Controller
                             'ticketNo' => $ticketNo
                         ], 200);
                     }
+                } else {
+                    return response()->json([
+                        'status' => 'seat already taken',
+                        'statusCode' => env('STATUS_CODE_PREFIX') . '401'
+                    ], 400);
                 }
             }
             return response()->json([
@@ -120,7 +125,12 @@ class BookingController extends Controller
             ->when(isset($request->origin), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('from', $request->origin)))
             ->when(isset($request->destination), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('to', $request->destination)))
             ->when(isset($request->busNumber), fn($query) => $query->whereHas('timetable', fn($timetable) => $timetable->whereBusId($request->busNumber)))
-            ->orderby('id', 'DESC')->paginate(57);
+            ->orderby('id', 'DESC');
+            if ($request->isPaginate) {
+                $bookings = $bookings->paginate(57);
+            } else {
+                $bookings = $bookings->get();
+            }
         return BookingResource::collection($bookings);
     }
 
