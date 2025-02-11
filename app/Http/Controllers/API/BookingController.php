@@ -30,7 +30,8 @@ class BookingController extends Controller
         try {
             // $route = Route::whereFrom($request->from)->whereTo($request->to)->first();
             // $bus = Bus::whereNumber($request->bus_no)->first();
-            if ($request->userRole == 'agent' || is_null($request->userRole)) {
+            
+            // if ($request->userRole == 'agent' || is_null($request->userRole)) {
                 $timetable = Timetable::find($request->timetableId);
                 if (is_null($timetable->bookings()->whereSeatNo($request->seat_no)->first())) {
                     $booking = Booking::updateOrCreate([
@@ -73,7 +74,7 @@ class BookingController extends Controller
                         'statusCode' => env('STATUS_CODE_PREFIX') . '401'
                     ], 400);
                 }
-            }
+            // }
             return response()->json([
                 'status' => 'failed',
                 'statusCode' => env('STATUS_CODE_PREFIX') . '400'
