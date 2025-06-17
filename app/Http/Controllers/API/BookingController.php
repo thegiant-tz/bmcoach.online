@@ -30,50 +30,52 @@ class BookingController extends Controller
         try {
             // $route = Route::whereFrom($request->from)->whereTo($request->to)->first();
             // $bus = Bus::whereNumber($request->bus_no)->first();
-            
-            // if ($request->userRole == 'agent' || is_null($request->userRole)) {
-                $timetable = Timetable::find($request->timetableId);
-                if (is_null($timetable->bookings()->whereSeatNo($request->seat_no)->first())) {
-                    $booking = Booking::updateOrCreate([
-                        'timetable_id' => $timetable->id,
-                        'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
-                        'status' => 'Processing'
-                    ], [
-                        'route_id' => $timetable->route->id,
-                        'timetable_id' => $timetable->id,
-                        'boarding_point_id' => $request->boardingPointId,
-                        'dropping_point_id' => null,
-                        'bus_id' => $timetable->bus->id,
-                        'agent_id' => $agentId,
-                        'psg_name' => $request->psg_name ?? null,
-                        'psg_phone' => $request->psg_phone ?? null,
-                        'fare' => $request->fare,
-                        'dep_date' => $timetable->dep_time,
-                        'dep_time' => Carbon::parse($timetable->dep_time)->format('H:i:s'),
-                        'seat_no' => $request->seat_no,
-                        'status' => $request->status ?? 'Processing'
-                    ]);
 
-                    if ($booking) {
-                        $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
-                        BLSMS::_sendMessageBLSM(
-                            message: SMSService::bookingSMS($booking, $ticketNo),
-                            recipient: $booking->psg_phone
-                        );
-    
-                        return response()->json([
-                            'status' => 'success',
-                            'statusCode' => env('STATUS_CODE_PREFIX') . '200',
-                            'booking' => $booking,
-                            'ticketNo' => $ticketNo
-                        ], 200);
-                    }
-                } else {
+            // if ($request->userRole == 'agent' || is_null($request->userRole)) {
+            $timetable = Timetable::find($request->timetableId);
+            if (is_null($timetable->bookings()->whereSeatNo($request->seat_no)->first())) {
+                // [
+                //     'timetable_id' => $timetable->id,
+                //     'agent_id' => $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId(),
+                //     'status' => 'Processing'
+                // ], 
+                $agentId = ($request->userRole == 'agent' || is_null($request->userRole)) ?  Auth::user()->id : defaultAgentId();
+                $booking = Booking::updateOrCreate([
+                    'route_id' => $timetable->route->id,
+                    'timetable_id' => $timetable->id,
+                    'boarding_point_id' => $request->boardingPointId,
+                    'dropping_point_id' => null,
+                    'bus_id' => $timetable->bus->id,
+                    'agent_id' => $agentId,
+                    'psg_name' => $request->psg_name ?? null,
+                    'psg_phone' => $request->psg_phone ?? null,
+                    'fare' => $request->fare,
+                    'dep_date' => $timetable->dep_time,
+                    'dep_time' => Carbon::parse($timetable->dep_time)->format('H:i:s'),
+                    'seat_no' => $request->seat_no,
+                    'status' => $request->status ?? 'Processing'
+                ]);
+
+                if ($booking) {
+                    $ticketNo = 'BM' . str_pad($booking->id, 5, '0', STR_PAD_LEFT);
+                    BLSMS::_sendMessageBLSM(
+                        message: SMSService::bookingSMS($booking, $ticketNo),
+                        recipient: $booking->psg_phone
+                    );
+
                     return response()->json([
-                        'status' => 'seat already taken',
-                        'statusCode' => env('STATUS_CODE_PREFIX') . '401'
-                    ], 400);
+                        'status' => 'success',
+                        'statusCode' => env('STATUS_CODE_PREFIX') . '200',
+                        'booking' => $booking,
+                        'ticketNo' => $ticketNo
+                    ], 200);
                 }
+            } else {
+                return response()->json([
+                    'status' => 'seat already taken',
+                    'statusCode' => env('STATUS_CODE_PREFIX') . '401'
+                ], 400);
+            }
             // }
             return response()->json([
                 'status' => 'failed',
@@ -91,11 +93,22 @@ class BookingController extends Controller
     function destroy(Request $request)
     {
         try {
-            Booking::find($request->bookingId)->delete();
-            return response()->json([
-                'status' => 'success',
-                'statusCode' => env('STATUS_CODE_PREFIX') . '200',
-            ], 200);
+            // return json_decode($request->selectedSeats);
+            if (!isset($request->selectedSeats)) {
+                Booking::find($request->bookingId)->delete();
+                return response()->json([
+                    'status' => 'success',
+                    'statusCode' => env('STATUS_CODE_PREFIX') . '200',
+                ], 200);
+            } else {
+                foreach (json_decode($request->selectedSeats) as $bookingId) {
+                    Booking::find($bookingId)->delete();
+                }
+                return response()->json([
+                    'status' => 'success',
+                    'statusCode' => env('STATUS_CODE_PREFIX') . '200',
+                ], 200);
+            }
         } catch (\Throwable $th) {
             return errorResponse($th);
         }
@@ -127,11 +140,11 @@ class BookingController extends Controller
             ->when(isset($request->destination), fn($query) => $query->whereHas('timetable.route', fn($route) => $route->where('to', $request->destination)))
             ->when(isset($request->busNumber), fn($query) => $query->whereHas('timetable', fn($timetable) => $timetable->whereBusId($request->busNumber)))
             ->orderby('id', 'DESC');
-            if ($request->isPaginate) {
-                $bookings = $bookings->paginate(57);
-            } else {
-                $bookings = $bookings->get();
-            }
+        if ($request->isPaginate) {
+            $bookings = $bookings->paginate(57);
+        } else {
+            $bookings = $bookings->get();
+        }
         return BookingResource::collection($bookings);
     }
 

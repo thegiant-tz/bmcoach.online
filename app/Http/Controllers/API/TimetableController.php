@@ -18,6 +18,7 @@ class TimetableController extends Controller
         $seats = [];
         foreach ($bookings as $booking) {
             $seats[$booking->seat_no] = $booking->status;
+            $seats[$booking->seat_no.'_agent'] = $booking->agent_id;
         }
         return $seats;
     }
@@ -90,3 +91,4 @@ class TimetableController extends Controller
         }
     }
 }
+
