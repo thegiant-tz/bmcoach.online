@@ -17,14 +17,20 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $names = explode(' ', $this->psg_name);
-        $name = $names[0] . (!isset($names[1]) ? '' : ' ' . str_split($names[1])[0]);
+        // $names = explode(' ', $this->psg_name);
+        
+        // if (!is_null($names[0])) {
+        //     $name = $names[0] . (!isset($names[1]) ? '' : ' ' . str_split($names[1])[0]);
+        // } else {
+        //     $name = '';
+        // }
+
 
         $names = explode(' ', $this->agent->name);
-        $agentNamePdf = $names[0];
+        $agentNamePdf = $names[0] ?? 'system';
         return [
             'psgName' => $this->psg_name,
-            'psgNamePdf' => $name,
+            'psgNamePdf' => $name ?? '',
             'psgPhone' => $this->psg_phone,
             'seatNo' => $this->seat_no,
             'ticketNo' => 'BM' . str_pad($this->id, 5, '0', STR_PAD_LEFT),
